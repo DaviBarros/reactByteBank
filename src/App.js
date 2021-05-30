@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 
 import Conta from './conta/Conta';
 import Transacoes from './transacoes/Transacoes';
@@ -14,33 +14,44 @@ export const calcularNovoSaldo = (valores, saldo) => {
   }
 }
 
+function useMounted() {
+  const mountedRef = useRef(true);
+
+  useEffect(() => () => {
+    mountedRef.current = false;
+  }, []);
+
+  return useCallback(() => mountedRef.current || false, []);
+}
+
 function App() {
+  const mounted = useMounted();
   const [saldo, atualizarSaldo] = useState(1000);
   const [transacoes, atualizarTransacoes] = useState([]);
 
   async function carregarTransacoes() {
     const transacoes = await api.listaTransacoes();
+    if(!mounted()) return ;    
     atualizarTransacoes(transacoes);
   }
 
   async function obterSaldo() {
-    atualizarSaldo(await api.buscaSaldo());
+    const saldo = await api.buscaSaldo();
+    if(!mounted()) return ; 
+    atualizarSaldo(saldo);
   }
 
   function realizarTransacao(valores) {  
     const novoSaldo = calcularNovoSaldo(valores, saldo);
 
-    api.atualizaSaldo(novoSaldo).catch((error) => console.error(error))
-    api.atualizaTransacoes(valores).catch((error) => console.error(error))
-    
     atualizarSaldo(novoSaldo);
-    atualizarTransacoes([valores]);
+    atualizarTransacoes((valoresAtuais) => [...valoresAtuais, valores]);
   }
 
   useEffect(() => {
-    obterSaldo();
-    carregarTransacoes();
-  }, [saldo])
+     obterSaldo();
+     carregarTransacoes();
+  }, [])
 
   return (
     <div className="App">

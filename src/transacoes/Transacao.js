@@ -16,7 +16,7 @@ function Transacao({ data, tipo, valor }) {
 
 Transacao.defaultProps = {
     tipo: '',
-    valor: '0',
+    valor: '',
     data: '',
 }
 

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 import Transacao from './Transacao';
 
-const Transacoes = ({ transacoes }) => {
+const Transacoes  = ({ transacoes }) => {
     return <div data-testid="transacoes">
         {transacoes && transacoes
             .map(({id, transacao, valor, data}) =>
